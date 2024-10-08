@@ -1,5 +1,5 @@
 # Go base image
-FROM golang:1.20-alpine
+FROM golang:1.22
 
 # Çalışma dizinini ayarla
 WORKDIR /app

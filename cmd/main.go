@@ -10,7 +10,9 @@ import (
     _ "github.com/go-sql-driver/mysql"
     "github.com/joho/godotenv"
 
+    _ "todo-app-go/docs" // Swagger docs
     "todo-app-go/internal/todos"
+    httpSwagger "github.com/swaggo/http-swagger" // Swagger UI
 )
 
 var db *sql.DB
@@ -29,6 +31,11 @@ func connectToDB() {
     log.Println("Veritabanına başarıyla bağlanıldı!")
 }
 
+// @title Todo App API
+// @version 1.0
+// @description This is a simple Todo App API.
+// @host localhost:8080
+// @BasePath /
 func main() {
     err := godotenv.Load()
     if err != nil {
@@ -39,7 +46,8 @@ func main() {
 
     r := chi.NewRouter()
 
-    // CRUD endpoint'leri
+    r.Get("/swagger/*", httpSwagger.WrapHandler)
+
     r.Post("/todos", todos.CreateTodo(db))
     r.Get("/todos", todos.GetTodos(db))
     r.Get("/todos/{id}", todos.GetTodoByID(db))
