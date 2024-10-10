@@ -4,6 +4,7 @@ package ent
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"todo-app-go/ent/todo"
 
@@ -18,6 +19,32 @@ type TodoCreate struct {
 	hooks    []Hook
 }
 
+// SetTitle sets the "title" field.
+func (tc *TodoCreate) SetTitle(s string) *TodoCreate {
+	tc.mutation.SetTitle(s)
+	return tc
+}
+
+// SetDescription sets the "description" field.
+func (tc *TodoCreate) SetDescription(s string) *TodoCreate {
+	tc.mutation.SetDescription(s)
+	return tc
+}
+
+// SetCompleted sets the "completed" field.
+func (tc *TodoCreate) SetCompleted(b bool) *TodoCreate {
+	tc.mutation.SetCompleted(b)
+	return tc
+}
+
+// SetNillableCompleted sets the "completed" field if the given value is not nil.
+func (tc *TodoCreate) SetNillableCompleted(b *bool) *TodoCreate {
+	if b != nil {
+		tc.SetCompleted(*b)
+	}
+	return tc
+}
+
 // Mutation returns the TodoMutation object of the builder.
 func (tc *TodoCreate) Mutation() *TodoMutation {
 	return tc.mutation
@@ -25,6 +52,7 @@ func (tc *TodoCreate) Mutation() *TodoMutation {
 
 // Save creates the Todo in the database.
 func (tc *TodoCreate) Save(ctx context.Context) (*Todo, error) {
+	tc.defaults()
 	return withHooks(ctx, tc.sqlSave, tc.mutation, tc.hooks)
 }
 
@@ -50,8 +78,35 @@ func (tc *TodoCreate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (tc *TodoCreate) defaults() {
+	if _, ok := tc.mutation.Completed(); !ok {
+		v := todo.DefaultCompleted
+		tc.mutation.SetCompleted(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (tc *TodoCreate) check() error {
+	if _, ok := tc.mutation.Title(); !ok {
+		return &ValidationError{Name: "title", err: errors.New(`ent: missing required field "Todo.title"`)}
+	}
+	if v, ok := tc.mutation.Title(); ok {
+		if err := todo.TitleValidator(v); err != nil {
+			return &ValidationError{Name: "title", err: fmt.Errorf(`ent: validator failed for field "Todo.title": %w`, err)}
+		}
+	}
+	if _, ok := tc.mutation.Description(); !ok {
+		return &ValidationError{Name: "description", err: errors.New(`ent: missing required field "Todo.description"`)}
+	}
+	if v, ok := tc.mutation.Description(); ok {
+		if err := todo.DescriptionValidator(v); err != nil {
+			return &ValidationError{Name: "description", err: fmt.Errorf(`ent: validator failed for field "Todo.description": %w`, err)}
+		}
+	}
+	if _, ok := tc.mutation.Completed(); !ok {
+		return &ValidationError{Name: "completed", err: errors.New(`ent: missing required field "Todo.completed"`)}
+	}
 	return nil
 }
 
@@ -78,6 +133,18 @@ func (tc *TodoCreate) createSpec() (*Todo, *sqlgraph.CreateSpec) {
 		_node = &Todo{config: tc.config}
 		_spec = sqlgraph.NewCreateSpec(todo.Table, sqlgraph.NewFieldSpec(todo.FieldID, field.TypeInt))
 	)
+	if value, ok := tc.mutation.Title(); ok {
+		_spec.SetField(todo.FieldTitle, field.TypeString, value)
+		_node.Title = value
+	}
+	if value, ok := tc.mutation.Description(); ok {
+		_spec.SetField(todo.FieldDescription, field.TypeString, value)
+		_node.Description = value
+	}
+	if value, ok := tc.mutation.Completed(); ok {
+		_spec.SetField(todo.FieldCompleted, field.TypeBool, value)
+		_node.Completed = value
+	}
 	return _node, _spec
 }
 
@@ -99,6 +166,7 @@ func (tcb *TodoCreateBulk) Save(ctx context.Context) ([]*Todo, error) {
 	for i := range tcb.builders {
 		func(i int, root context.Context) {
 			builder := tcb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*TodoMutation)
 				if !ok {

@@ -1,35 +1,19 @@
 package main
 
 import (
-    "database/sql"
+    "context"
     "log"
     "net/http"
     "os"
 
     "github.com/go-chi/chi/v5"
-    _ "github.com/go-sql-driver/mysql"
     "github.com/joho/godotenv"
-
-    _ "todo-app-go/docs" // Swagger docs
+    "github.com/swaggo/http-swagger"   // Swagger UI
+    _ "todo-app-go/docs"               // Swagger docs
+    "todo-app-go/ent"                  // Entgo Client
     "todo-app-go/internal/todos"
-    httpSwagger "github.com/swaggo/http-swagger" // Swagger UI
+    _ "github.com/go-sql-driver/mysql" // MySQL Driver
 )
-
-var db *sql.DB
-
-func connectToDB() {
-    var err error
-    dsn := os.Getenv("DB_USER") + ":" + os.Getenv("DB_PASSWORD") + "@tcp(" + os.Getenv("DB_HOST") + ":" + os.Getenv("DB_PORT") + ")/" + os.Getenv("DB_NAME")
-    db, err = sql.Open("mysql", dsn)
-    if err != nil {
-        log.Fatalf("Veritabanına bağlanılamadı: %v", err)
-    }
-
-    if err = db.Ping(); err != nil {
-        log.Fatalf("Veritabanına bağlanılamadı: %v", err)
-    }
-    log.Println("Veritabanına başarıyla bağlanıldı!")
-}
 
 // @title Todo App API
 // @version 1.0
@@ -37,23 +21,41 @@ func connectToDB() {
 // @host localhost:8080
 // @BasePath /
 func main() {
+    // Load environment variables
     err := godotenv.Load()
     if err != nil {
         log.Fatalf("Error loading .env file")
     }
 
-    connectToDB()
+    // Connect to Entgo client
+    client, err := ent.Open("mysql", os.Getenv("DB_USER")+":"+
+        os.Getenv("DB_PASSWORD")+"@tcp("+os.Getenv("DB_HOST")+":"+
+        os.Getenv("DB_PORT")+")/"+os.Getenv("DB_NAME")+"?parseTime=True")
 
+    if err != nil {
+        log.Fatalf("Failed to connect to database: %v", err)
+    }
+    defer client.Close()
+
+    // Verify connection to the database
+    if err := client.Schema.Create(context.Background()); err != nil {
+        log.Fatalf("Failed creating schema resources: %v", err)
+    }
+
+    // Set up the router
     r := chi.NewRouter()
 
+    // Swagger handler
     r.Get("/swagger/*", httpSwagger.WrapHandler)
 
-    r.Post("/todos", todos.CreateTodo(db))
-    r.Get("/todos", todos.GetTodos(db))
-    r.Get("/todos/{id}", todos.GetTodoByID(db))
-    r.Put("/todos/{id}", todos.UpdateTodo(db))
-    r.Delete("/todos/{id}", todos.DeleteTodo(db))
+    // Todo routes using Entgo client
+    r.Post("/todos", todos.CreateTodo(client))
+    r.Get("/todos", todos.GetTodos(client))
+    r.Get("/todos/{id}", todos.GetTodoByID(client))
+    r.Put("/todos/{id}", todos.UpdateTodo(client))
+    r.Delete("/todos/{id}", todos.DeleteTodo(client))
 
+    // Start server
     log.Println("Server " + os.Getenv("APP_PORT") + " portunda çalışıyor...")
     http.ListenAndServe(":"+os.Getenv("APP_PORT"), r)
 }

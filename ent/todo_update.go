@@ -27,6 +27,48 @@ func (tu *TodoUpdate) Where(ps ...predicate.Todo) *TodoUpdate {
 	return tu
 }
 
+// SetTitle sets the "title" field.
+func (tu *TodoUpdate) SetTitle(s string) *TodoUpdate {
+	tu.mutation.SetTitle(s)
+	return tu
+}
+
+// SetNillableTitle sets the "title" field if the given value is not nil.
+func (tu *TodoUpdate) SetNillableTitle(s *string) *TodoUpdate {
+	if s != nil {
+		tu.SetTitle(*s)
+	}
+	return tu
+}
+
+// SetDescription sets the "description" field.
+func (tu *TodoUpdate) SetDescription(s string) *TodoUpdate {
+	tu.mutation.SetDescription(s)
+	return tu
+}
+
+// SetNillableDescription sets the "description" field if the given value is not nil.
+func (tu *TodoUpdate) SetNillableDescription(s *string) *TodoUpdate {
+	if s != nil {
+		tu.SetDescription(*s)
+	}
+	return tu
+}
+
+// SetCompleted sets the "completed" field.
+func (tu *TodoUpdate) SetCompleted(b bool) *TodoUpdate {
+	tu.mutation.SetCompleted(b)
+	return tu
+}
+
+// SetNillableCompleted sets the "completed" field if the given value is not nil.
+func (tu *TodoUpdate) SetNillableCompleted(b *bool) *TodoUpdate {
+	if b != nil {
+		tu.SetCompleted(*b)
+	}
+	return tu
+}
+
 // Mutation returns the TodoMutation object of the builder.
 func (tu *TodoUpdate) Mutation() *TodoMutation {
 	return tu.mutation
@@ -59,7 +101,25 @@ func (tu *TodoUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (tu *TodoUpdate) check() error {
+	if v, ok := tu.mutation.Title(); ok {
+		if err := todo.TitleValidator(v); err != nil {
+			return &ValidationError{Name: "title", err: fmt.Errorf(`ent: validator failed for field "Todo.title": %w`, err)}
+		}
+	}
+	if v, ok := tu.mutation.Description(); ok {
+		if err := todo.DescriptionValidator(v); err != nil {
+			return &ValidationError{Name: "description", err: fmt.Errorf(`ent: validator failed for field "Todo.description": %w`, err)}
+		}
+	}
+	return nil
+}
+
 func (tu *TodoUpdate) sqlSave(ctx context.Context) (n int, err error) {
+	if err := tu.check(); err != nil {
+		return n, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(todo.Table, todo.Columns, sqlgraph.NewFieldSpec(todo.FieldID, field.TypeInt))
 	if ps := tu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -67,6 +127,15 @@ func (tu *TodoUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := tu.mutation.Title(); ok {
+		_spec.SetField(todo.FieldTitle, field.TypeString, value)
+	}
+	if value, ok := tu.mutation.Description(); ok {
+		_spec.SetField(todo.FieldDescription, field.TypeString, value)
+	}
+	if value, ok := tu.mutation.Completed(); ok {
+		_spec.SetField(todo.FieldCompleted, field.TypeBool, value)
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, tu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -86,6 +155,48 @@ type TodoUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *TodoMutation
+}
+
+// SetTitle sets the "title" field.
+func (tuo *TodoUpdateOne) SetTitle(s string) *TodoUpdateOne {
+	tuo.mutation.SetTitle(s)
+	return tuo
+}
+
+// SetNillableTitle sets the "title" field if the given value is not nil.
+func (tuo *TodoUpdateOne) SetNillableTitle(s *string) *TodoUpdateOne {
+	if s != nil {
+		tuo.SetTitle(*s)
+	}
+	return tuo
+}
+
+// SetDescription sets the "description" field.
+func (tuo *TodoUpdateOne) SetDescription(s string) *TodoUpdateOne {
+	tuo.mutation.SetDescription(s)
+	return tuo
+}
+
+// SetNillableDescription sets the "description" field if the given value is not nil.
+func (tuo *TodoUpdateOne) SetNillableDescription(s *string) *TodoUpdateOne {
+	if s != nil {
+		tuo.SetDescription(*s)
+	}
+	return tuo
+}
+
+// SetCompleted sets the "completed" field.
+func (tuo *TodoUpdateOne) SetCompleted(b bool) *TodoUpdateOne {
+	tuo.mutation.SetCompleted(b)
+	return tuo
+}
+
+// SetNillableCompleted sets the "completed" field if the given value is not nil.
+func (tuo *TodoUpdateOne) SetNillableCompleted(b *bool) *TodoUpdateOne {
+	if b != nil {
+		tuo.SetCompleted(*b)
+	}
+	return tuo
 }
 
 // Mutation returns the TodoMutation object of the builder.
@@ -133,7 +244,25 @@ func (tuo *TodoUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (tuo *TodoUpdateOne) check() error {
+	if v, ok := tuo.mutation.Title(); ok {
+		if err := todo.TitleValidator(v); err != nil {
+			return &ValidationError{Name: "title", err: fmt.Errorf(`ent: validator failed for field "Todo.title": %w`, err)}
+		}
+	}
+	if v, ok := tuo.mutation.Description(); ok {
+		if err := todo.DescriptionValidator(v); err != nil {
+			return &ValidationError{Name: "description", err: fmt.Errorf(`ent: validator failed for field "Todo.description": %w`, err)}
+		}
+	}
+	return nil
+}
+
 func (tuo *TodoUpdateOne) sqlSave(ctx context.Context) (_node *Todo, err error) {
+	if err := tuo.check(); err != nil {
+		return _node, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(todo.Table, todo.Columns, sqlgraph.NewFieldSpec(todo.FieldID, field.TypeInt))
 	id, ok := tuo.mutation.ID()
 	if !ok {
@@ -158,6 +287,15 @@ func (tuo *TodoUpdateOne) sqlSave(ctx context.Context) (_node *Todo, err error) 
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := tuo.mutation.Title(); ok {
+		_spec.SetField(todo.FieldTitle, field.TypeString, value)
+	}
+	if value, ok := tuo.mutation.Description(); ok {
+		_spec.SetField(todo.FieldDescription, field.TypeString, value)
+	}
+	if value, ok := tuo.mutation.Completed(); ok {
+		_spec.SetField(todo.FieldCompleted, field.TypeBool, value)
 	}
 	_node = &Todo{config: tuo.config}
 	_spec.Assign = _node.assignValues

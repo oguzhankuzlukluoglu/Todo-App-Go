@@ -2,8 +2,27 @@
 
 package ent
 
+import (
+	"todo-app-go/ent/schema"
+	"todo-app-go/ent/todo"
+)
+
 // The init function reads all schema descriptors with runtime code
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	todoFields := schema.Todo{}.Fields()
+	_ = todoFields
+	// todoDescTitle is the schema descriptor for title field.
+	todoDescTitle := todoFields[0].Descriptor()
+	// todo.TitleValidator is a validator for the "title" field. It is called by the builders before save.
+	todo.TitleValidator = todoDescTitle.Validators[0].(func(string) error)
+	// todoDescDescription is the schema descriptor for description field.
+	todoDescDescription := todoFields[1].Descriptor()
+	// todo.DescriptionValidator is a validator for the "description" field. It is called by the builders before save.
+	todo.DescriptionValidator = todoDescDescription.Validators[0].(func(string) error)
+	// todoDescCompleted is the schema descriptor for completed field.
+	todoDescCompleted := todoFields[2].Descriptor()
+	// todo.DefaultCompleted holds the default value on creation for the completed field.
+	todo.DefaultCompleted = todoDescCompleted.Default.(bool)
 }

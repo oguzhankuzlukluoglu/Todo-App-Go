@@ -1,10 +1,11 @@
 package todos
 
 import (
-	"database/sql"
+	"context"
 	"encoding/json"
 	"net/http"
 
+	"todo-app-go/ent"
 	"github.com/go-chi/chi/v5"
 )
 
@@ -13,21 +14,24 @@ import (
 // @Tags todos
 // @Accept  json
 // @Produce  json
-// @Param todo body Todo true "Todo nesnesi"
-// @Success 201 {object} string "Todo başarıyla eklendi"
+// @Param todo body ent.Todo true "Todo nesnesi"
+// @Success 201 {string} string "Todo başarıyla eklendi"
 // @Failure 400 {string} string "Geçersiz veri"
 // @Failure 500 {string} string "Todo eklenemedi"
 // @Router /todos [post]
-func CreateTodo(db *sql.DB) http.HandlerFunc {
+func CreateTodo(client *ent.Client) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var todo Todo
+		var todo ent.Todo
 		if err := json.NewDecoder(r.Body).Decode(&todo); err != nil {
 			http.Error(w, "Geçersiz veri", http.StatusBadRequest)
 			return
 		}
 
-		query := `INSERT INTO todos (title, description) VALUES (?, ?)`
-		_, err := db.Exec(query, todo.Title, todo.Description)
+		_, err := client.Todo.
+			Create().
+			SetTitle(todo.Title).
+			SetDescription(todo.Description).
+			Save(context.Background())
 		if err != nil {
 			http.Error(w, "Todo eklenemedi", http.StatusInternalServerError)
 			return
@@ -42,26 +46,15 @@ func CreateTodo(db *sql.DB) http.HandlerFunc {
 // @Description Bu endpoint tüm todo'ları listeler.
 // @Tags todos
 // @Produce  json
-// @Success 200 {array} Todo "Todo'lar başarıyla listelendi"
+// @Success 200 {array} ent.Todo "Todo'lar başarıyla listelendi"
 // @Failure 500 {string} string "Todo'lar listelenemedi"
 // @Router /todos [get]
-func GetTodos(db *sql.DB) http.HandlerFunc {
+func GetTodos(client *ent.Client) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		rows, err := db.Query("SELECT id, title, description FROM todos")
+		todos, err := client.Todo.Query().All(context.Background())
 		if err != nil {
 			http.Error(w, "Todo'lar listelenemedi", http.StatusInternalServerError)
 			return
-		}
-		defer rows.Close()
-
-		var todos []Todo
-		for rows.Next() {
-			var todo Todo
-			if err := rows.Scan(&todo.ID, &todo.Title, &todo.Description); err != nil {
-				http.Error(w, "Veriler okunamadı", http.StatusInternalServerError)
-				return
-			}
-			todos = append(todos, todo)
 		}
 
 		if err := json.NewEncoder(w).Encode(todos); err != nil {
@@ -75,22 +68,16 @@ func GetTodos(db *sql.DB) http.HandlerFunc {
 // @Tags todos
 // @Produce  json
 // @Param id path int true "Todo ID"
-// @Success 200 {object} Todo "Belirli todo başarıyla getirildi"
+// @Success 200 {object} ent.Todo "Belirli todo başarıyla getirildi"
 // @Failure 404 {string} string "Todo bulunamadı"
 // @Failure 500 {string} string "Veritabanı hatası"
 // @Router /todos/{id} [get]
-func GetTodoByID(db *sql.DB) http.HandlerFunc {
+func GetTodoByID(client *ent.Client) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id := chi.URLParam(r, "id")
-
-		var todo Todo
-		query := "SELECT id, title, description FROM todos WHERE id = ?"
-		err := db.QueryRow(query, id).Scan(&todo.ID, &todo.Title, &todo.Description)
-		if err == sql.ErrNoRows {
+		todo, err := client.Todo.Get(context.Background(), id)
+		if err != nil {
 			http.Error(w, "Todo bulunamadı", http.StatusNotFound)
-			return
-		} else if err != nil {
-			http.Error(w, "Veritabanı hatası", http.StatusInternalServerError)
 			return
 		}
 
@@ -106,23 +93,26 @@ func GetTodoByID(db *sql.DB) http.HandlerFunc {
 // @Accept  json
 // @Produce  json
 // @Param id path int true "Todo ID"
-// @Param todo body Todo true "Todo nesnesi"
+// @Param todo body ent.Todo true "Todo nesnesi"
 // @Success 200 {string} string "Todo başarıyla güncellendi"
 // @Failure 400 {string} string "Geçersiz veri"
 // @Failure 500 {string} string "Todo güncellenemedi"
 // @Router /todos/{id} [put]
-func UpdateTodo(db *sql.DB) http.HandlerFunc {
+func UpdateTodo(client *ent.Client) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id := chi.URLParam(r, "id")
 
-		var todo Todo
+		var todo ent.Todo
 		if err := json.NewDecoder(r.Body).Decode(&todo); err != nil {
 			http.Error(w, "Geçersiz veri", http.StatusBadRequest)
 			return
 		}
 
-		query := "UPDATE todos SET title = ?, description = ? WHERE id = ?"
-		_, err := db.Exec(query, todo.Title, todo.Description, id)
+		_, err := client.Todo.
+			UpdateOneID(id).
+			SetTitle(todo.Title).
+			SetDescription(todo.Description).
+			Save(context.Background())
 		if err != nil {
 			http.Error(w, "Todo güncellenemedi", http.StatusInternalServerError)
 			return
@@ -140,12 +130,11 @@ func UpdateTodo(db *sql.DB) http.HandlerFunc {
 // @Success 200 {string} string "Todo başarıyla silindi"
 // @Failure 500 {string} string "Todo silinemedi"
 // @Router /todos/{id} [delete]
-func DeleteTodo(db *sql.DB) http.HandlerFunc {
+func DeleteTodo(client *ent.Client) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id := chi.URLParam(r, "id")
 
-		query := "DELETE FROM todos WHERE id = ?"
-		_, err := db.Exec(query, id)
+		err := client.Todo.DeleteOneID(id).Exec(context.Background())
 		if err != nil {
 			http.Error(w, "Todo silinemedi", http.StatusInternalServerError)
 			return

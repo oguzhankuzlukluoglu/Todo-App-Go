@@ -258,6 +258,18 @@ func (tq *TodoQuery) Clone() *TodoQuery {
 
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
+//
+// Example:
+//
+//	var v []struct {
+//		Title string `json:"title,omitempty"`
+//		Count int `json:"count,omitempty"`
+//	}
+//
+//	client.Todo.Query().
+//		GroupBy(todo.FieldTitle).
+//		Aggregate(ent.Count()).
+//		Scan(ctx, &v)
 func (tq *TodoQuery) GroupBy(field string, fields ...string) *TodoGroupBy {
 	tq.ctx.Fields = append([]string{field}, fields...)
 	grbuild := &TodoGroupBy{build: tq}
@@ -269,6 +281,16 @@ func (tq *TodoQuery) GroupBy(field string, fields ...string) *TodoGroupBy {
 
 // Select allows the selection one or more fields/columns for the given query,
 // instead of selecting all fields in the entity.
+//
+// Example:
+//
+//	var v []struct {
+//		Title string `json:"title,omitempty"`
+//	}
+//
+//	client.Todo.Query().
+//		Select(todo.FieldTitle).
+//		Scan(ctx, &v)
 func (tq *TodoQuery) Select(fields ...string) *TodoSelect {
 	tq.ctx.Fields = append(tq.ctx.Fields, fields...)
 	sbuild := &TodoSelect{TodoQuery: tq}

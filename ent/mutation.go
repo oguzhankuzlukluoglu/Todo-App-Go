@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"sync"
 	"todo-app-go/ent/predicate"
+	"todo-app-go/ent/todo"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -31,6 +32,9 @@ type TodoMutation struct {
 	op            Op
 	typ           string
 	id            *int
+	title         *string
+	description   *string
+	completed     *bool
 	clearedFields map[string]struct{}
 	done          bool
 	oldValue      func(context.Context) (*Todo, error)
@@ -135,6 +139,114 @@ func (m *TodoMutation) IDs(ctx context.Context) ([]int, error) {
 	}
 }
 
+// SetTitle sets the "title" field.
+func (m *TodoMutation) SetTitle(s string) {
+	m.title = &s
+}
+
+// Title returns the value of the "title" field in the mutation.
+func (m *TodoMutation) Title() (r string, exists bool) {
+	v := m.title
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTitle returns the old "title" field's value of the Todo entity.
+// If the Todo object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TodoMutation) OldTitle(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTitle is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTitle requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTitle: %w", err)
+	}
+	return oldValue.Title, nil
+}
+
+// ResetTitle resets all changes to the "title" field.
+func (m *TodoMutation) ResetTitle() {
+	m.title = nil
+}
+
+// SetDescription sets the "description" field.
+func (m *TodoMutation) SetDescription(s string) {
+	m.description = &s
+}
+
+// Description returns the value of the "description" field in the mutation.
+func (m *TodoMutation) Description() (r string, exists bool) {
+	v := m.description
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDescription returns the old "description" field's value of the Todo entity.
+// If the Todo object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TodoMutation) OldDescription(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDescription is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDescription requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDescription: %w", err)
+	}
+	return oldValue.Description, nil
+}
+
+// ResetDescription resets all changes to the "description" field.
+func (m *TodoMutation) ResetDescription() {
+	m.description = nil
+}
+
+// SetCompleted sets the "completed" field.
+func (m *TodoMutation) SetCompleted(b bool) {
+	m.completed = &b
+}
+
+// Completed returns the value of the "completed" field in the mutation.
+func (m *TodoMutation) Completed() (r bool, exists bool) {
+	v := m.completed
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCompleted returns the old "completed" field's value of the Todo entity.
+// If the Todo object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TodoMutation) OldCompleted(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCompleted is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCompleted requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCompleted: %w", err)
+	}
+	return oldValue.Completed, nil
+}
+
+// ResetCompleted resets all changes to the "completed" field.
+func (m *TodoMutation) ResetCompleted() {
+	m.completed = nil
+}
+
 // Where appends a list predicates to the TodoMutation builder.
 func (m *TodoMutation) Where(ps ...predicate.Todo) {
 	m.predicates = append(m.predicates, ps...)
@@ -169,7 +281,16 @@ func (m *TodoMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *TodoMutation) Fields() []string {
-	fields := make([]string, 0, 0)
+	fields := make([]string, 0, 3)
+	if m.title != nil {
+		fields = append(fields, todo.FieldTitle)
+	}
+	if m.description != nil {
+		fields = append(fields, todo.FieldDescription)
+	}
+	if m.completed != nil {
+		fields = append(fields, todo.FieldCompleted)
+	}
 	return fields
 }
 
@@ -177,6 +298,14 @@ func (m *TodoMutation) Fields() []string {
 // return value indicates that this field was not set, or was not defined in the
 // schema.
 func (m *TodoMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case todo.FieldTitle:
+		return m.Title()
+	case todo.FieldDescription:
+		return m.Description()
+	case todo.FieldCompleted:
+		return m.Completed()
+	}
 	return nil, false
 }
 
@@ -184,6 +313,14 @@ func (m *TodoMutation) Field(name string) (ent.Value, bool) {
 // returned if the mutation operation is not UpdateOne, or the query to the
 // database failed.
 func (m *TodoMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case todo.FieldTitle:
+		return m.OldTitle(ctx)
+	case todo.FieldDescription:
+		return m.OldDescription(ctx)
+	case todo.FieldCompleted:
+		return m.OldCompleted(ctx)
+	}
 	return nil, fmt.Errorf("unknown Todo field %s", name)
 }
 
@@ -192,6 +329,27 @@ func (m *TodoMutation) OldField(ctx context.Context, name string) (ent.Value, er
 // type.
 func (m *TodoMutation) SetField(name string, value ent.Value) error {
 	switch name {
+	case todo.FieldTitle:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTitle(v)
+		return nil
+	case todo.FieldDescription:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDescription(v)
+		return nil
+	case todo.FieldCompleted:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCompleted(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Todo field %s", name)
 }
@@ -213,6 +371,8 @@ func (m *TodoMutation) AddedField(name string) (ent.Value, bool) {
 // the field is not defined in the schema, or if the type mismatched the field
 // type.
 func (m *TodoMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
 	return fmt.Errorf("unknown Todo numeric field %s", name)
 }
 
@@ -238,6 +398,17 @@ func (m *TodoMutation) ClearField(name string) error {
 // ResetField resets all changes in the mutation for the field with the given name.
 // It returns an error if the field is not defined in the schema.
 func (m *TodoMutation) ResetField(name string) error {
+	switch name {
+	case todo.FieldTitle:
+		m.ResetTitle()
+		return nil
+	case todo.FieldDescription:
+		m.ResetDescription()
+		return nil
+	case todo.FieldCompleted:
+		m.ResetCompleted()
+		return nil
+	}
 	return fmt.Errorf("unknown Todo field %s", name)
 }
 
