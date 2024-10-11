@@ -7,7 +7,7 @@ import (
     "strconv" 
     "github.com/go-chi/chi/v5"
     "todo-app-go/ent"
-    "todo-app-go/ent/user"  // User modeli ve sorguları için gerekli
+    "todo-app-go/ent/user"  
 
 )
 
@@ -148,7 +148,7 @@ func UpdateTodo(client *ent.Client) http.HandlerFunc {
 func DeleteTodo(client *ent.Client) http.HandlerFunc {
     return func(w http.ResponseWriter, r *http.Request) {
         idStr := chi.URLParam(r, "id")
-        id, err := strconv.Atoi(idStr)  // string'i integer'a çeviriyoruz
+        id, err := strconv.Atoi(idStr) 
         if err != nil {
             http.Error(w, "Geçersiz ID", http.StatusBadRequest)
             return

@@ -15,7 +15,6 @@ import (
 	_ "todo-app-go/docs"
 )
 
-// Casbin middleware fonksiyonu
 func CasbinMiddleware(client *ent.Client, enforcer *casbin.Enforcer) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -57,12 +56,10 @@ func main() {
 		log.Fatalf("Casbin enforcer yapılandırması başarısız: %v", err)
 	}
 
-	// Casbin politikalarını yükle
 	if err := e.LoadPolicy(); err != nil {
 		log.Fatalf("Casbin politikaları yüklenemedi: %v", err)
 	}
 
-	// Başarılı olduğunu doğrulamak için bir kontrol yapalım
 	log.Println("Casbin yapılandırması başarıyla yüklendi")
 	// Entgo veritabanı bağlantısı
 	client, err := ent.Open("mysql", "todo_user:user_password@tcp(mysql:3306)/todoapp?parseTime=True")
@@ -76,24 +73,13 @@ func main() {
 		log.Fatalf("Şema oluşturulamadı: %v", err)
 	}
 
-	// Router oluştur
 	r := chi.NewRouter()
 
-	// Casbin middleware ekle
-
-	// Swagger handler'ı ekle
-	//r.Get("/swagger/doc.json", func(w http.ResponseWriter, r *http.Request) {
-	//	fmt.Println("Girdi")
-	//	http.ServeFile(w, r, "./docs/docs.go")
-	//})
 	r.Get("/swagger/*", httpSwagger.WrapHandler)
-	//r.Get("/swagger/*", httpSwagger.Handler(
-	//	httpSwagger.URL("http://localhost:8080/swagger/doc.json"), //The url pointing to API definition
-	//))
-	// Todo rotaları
+
 	r.Post("/users/register", todos.RegisterUser(client))
 	r.Post("/users/login", todos.LoginUser(client))
-	r.Get("/users", todos.GetUsers(client)) // Kullanıcı listeleme rotası
+	r.Get("/users", todos.GetUsers(client)) 
 
 	r.Post("/todos", todos.CreateTodo(client))
 	r.Get("/todos", todos.GetTodos(client))
@@ -101,7 +87,7 @@ func main() {
 	r.Put("/todos/{id}", todos.UpdateTodo(client))
 	r.Delete("/todos/{id}", todos.DeleteTodo(client))
 
-	// Sunucuyu başlat
 	log.Println("Sunucu 8080 portunda çalışıyor...")
 	http.ListenAndServe(":8080", r)
 }
+
