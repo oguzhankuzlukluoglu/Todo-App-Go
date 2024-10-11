@@ -20,8 +20,8 @@ A simple Todo App built with Go, Chi, and Entgo. This app includes user registra
 ### Installation
  **Clone the repository:**
  -  ```bash
- -  git clone https://github.com/yourusername/todo-app-go.git
- -  cd todo-app-go
+   git clone https://github.com/yourusername/todo-app-go.git
+   cd todo-app-go
 
 
 
