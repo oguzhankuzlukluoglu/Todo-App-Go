@@ -1,0 +1,6 @@
+# role, obj, act
+admin, /todos, GET
+admin, /todos, POST
+admin, /todos, PUT
+admin, /todos, DELETE
+user, /todos, GET

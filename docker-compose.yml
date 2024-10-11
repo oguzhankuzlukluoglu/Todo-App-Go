@@ -37,6 +37,8 @@ services:
       DB_PASSWORD: user_password
     networks:
       - todo-app-network
+    volumes:
+      - todo-app-mysql-data:/var/lib/mysql
 
 networks:
   todo-app-network:

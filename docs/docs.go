@@ -17,7 +17,7 @@ const docTemplate = `{
     "paths": {
         "/todos": {
             "get": {
-                "description": "Bu endpoint tüm todo'ları listeler.",
+                "description": "Bu endpoint, tüm todo'ları listeler.",
                 "produces": [
                     "application/json"
                 ],
@@ -31,7 +31,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/todos.Todo"
+                                "$ref": "#/definitions/ent.Todo"
                             }
                         }
                     },
@@ -62,7 +62,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/todos.Todo"
+                            "$ref": "#/definitions/ent.Todo"
                         }
                     }
                 ],
@@ -111,7 +111,13 @@ const docTemplate = `{
                     "200": {
                         "description": "Belirli todo başarıyla getirildi",
                         "schema": {
-                            "$ref": "#/definitions/todos.Todo"
+                            "$ref": "#/definitions/ent.Todo"
+                        }
+                    },
+                    "400": {
+                        "description": "Geçersiz ID",
+                        "schema": {
+                            "type": "string"
                         }
                     },
                     "404": {
@@ -154,7 +160,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/todos.Todo"
+                            "$ref": "#/definitions/ent.Todo"
                         }
                     }
                 ],
@@ -204,8 +210,154 @@ const docTemplate = `{
                             "type": "string"
                         }
                     },
+                    "400": {
+                        "description": "Geçersiz ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
                     "500": {
                         "description": "Todo silinemedi",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/users": {
+            "get": {
+                "description": "Bu endpoint, tüm user'ları listeler.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Get all User",
+                "responses": {
+                    "200": {
+                        "description": "user'lar başarıyla listelendi",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/ent.Todo"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "user'lar listelenemedi",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/login": {
+            "post": {
+                "description": "This endpoint logs in a user with their username and password.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Log in a user",
+                "parameters": [
+                    {
+                        "description": "User Login Data",
+                        "name": "loginUser",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "password": {
+                                    "type": "string"
+                                },
+                                "username": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Logged in successfully",
+                        "schema": {
+                            "$ref": "#/definitions/ent.User"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/register": {
+            "post": {
+                "description": "This endpoint registers a new user with a role.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Register a new user",
+                "parameters": [
+                    {
+                        "description": "User Registration Data",
+                        "name": "registerUser",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "password": {
+                                    "type": "string"
+                                },
+                                "role": {
+                                    "type": "string"
+                                },
+                                "username": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "User registered successfully",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
                         "schema": {
                             "type": "string"
                         }
@@ -215,16 +367,40 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "todos.Todo": {
+        "ent.Todo": {
             "type": "object",
             "properties": {
                 "description": {
+                    "description": "Description holds the value of the \"description\" field.",
                     "type": "string"
                 },
                 "id": {
+                    "description": "ID of the ent.",
                     "type": "integer"
                 },
                 "title": {
+                    "description": "Title holds the value of the \"title\" field.",
+                    "type": "string"
+                }
+            }
+        },
+        "ent.User": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "description": "ID of the ent.",
+                    "type": "integer"
+                },
+                "password": {
+                    "description": "Password holds the value of the \"password\" field.",
+                    "type": "string"
+                },
+                "role": {
+                    "description": "Role holds the value of the \"role\" field.",
+                    "type": "string"
+                },
+                "username": {
+                    "description": "Username holds the value of the \"username\" field.",
                     "type": "string"
                 }
             }
