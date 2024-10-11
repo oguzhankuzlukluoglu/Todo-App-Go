@@ -1,3 +1,4 @@
+
 # Todo App
 
 ![Görüntü](./screenshot.png)
@@ -17,21 +18,19 @@ A simple Todo App built with Go, Chi, and Entgo. This app includes user registra
 - [Docker](https://www.docker.com/get-started)
 
 ### Installation
-
-1. **Clone the repository:**
+ **Clone the repository:**
    ```bash
    git clone https://github.com/yourusername/todo-app-go.git
    cd todo-app-go
-Build the Docker containers:
-docker-compose up --build
+
+
 
 Run the application:
-swag init and 
-
-docker-compose up
+terminal->swag init
+terminal->docker-compose up --build
+terminal->docker-compose up
 
 Swagger Documentation
 Once the app is running, you can access the Swagger documentation at:
 http://localhost:8080/swagger/index.html
-
 
