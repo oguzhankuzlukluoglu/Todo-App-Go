@@ -25,7 +25,7 @@ A simple Todo App built with Go, Chi, and Entgo. This app includes user registra
 
 
 
-Run the application:
+### Run the application:
 terminal->swag init
 terminal->docker-compose up --build
 terminal->docker-compose up
