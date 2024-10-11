@@ -63,11 +63,6 @@ func Description(v string) predicate.Todo {
 	return predicate.Todo(sql.FieldEQ(FieldDescription, v))
 }
 
-// Completed applies equality check predicate on the "completed" field. It's identical to CompletedEQ.
-func Completed(v bool) predicate.Todo {
-	return predicate.Todo(sql.FieldEQ(FieldCompleted, v))
-}
-
 // TitleEQ applies the EQ predicate on the "title" field.
 func TitleEQ(v string) predicate.Todo {
 	return predicate.Todo(sql.FieldEQ(FieldTitle, v))
@@ -196,16 +191,6 @@ func DescriptionEqualFold(v string) predicate.Todo {
 // DescriptionContainsFold applies the ContainsFold predicate on the "description" field.
 func DescriptionContainsFold(v string) predicate.Todo {
 	return predicate.Todo(sql.FieldContainsFold(FieldDescription, v))
-}
-
-// CompletedEQ applies the EQ predicate on the "completed" field.
-func CompletedEQ(v bool) predicate.Todo {
-	return predicate.Todo(sql.FieldEQ(FieldCompleted, v))
-}
-
-// CompletedNEQ applies the NEQ predicate on the "completed" field.
-func CompletedNEQ(v bool) predicate.Todo {
-	return predicate.Todo(sql.FieldNEQ(FieldCompleted, v))
 }
 
 // And groups predicates with the AND operator between them.

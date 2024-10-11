@@ -34,7 +34,6 @@ type TodoMutation struct {
 	id            *int
 	title         *string
 	description   *string
-	completed     *bool
 	clearedFields map[string]struct{}
 	done          bool
 	oldValue      func(context.Context) (*Todo, error)
@@ -211,42 +210,6 @@ func (m *TodoMutation) ResetDescription() {
 	m.description = nil
 }
 
-// SetCompleted sets the "completed" field.
-func (m *TodoMutation) SetCompleted(b bool) {
-	m.completed = &b
-}
-
-// Completed returns the value of the "completed" field in the mutation.
-func (m *TodoMutation) Completed() (r bool, exists bool) {
-	v := m.completed
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldCompleted returns the old "completed" field's value of the Todo entity.
-// If the Todo object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TodoMutation) OldCompleted(ctx context.Context) (v bool, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldCompleted is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldCompleted requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCompleted: %w", err)
-	}
-	return oldValue.Completed, nil
-}
-
-// ResetCompleted resets all changes to the "completed" field.
-func (m *TodoMutation) ResetCompleted() {
-	m.completed = nil
-}
-
 // Where appends a list predicates to the TodoMutation builder.
 func (m *TodoMutation) Where(ps ...predicate.Todo) {
 	m.predicates = append(m.predicates, ps...)
@@ -281,15 +244,12 @@ func (m *TodoMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *TodoMutation) Fields() []string {
-	fields := make([]string, 0, 3)
+	fields := make([]string, 0, 2)
 	if m.title != nil {
 		fields = append(fields, todo.FieldTitle)
 	}
 	if m.description != nil {
 		fields = append(fields, todo.FieldDescription)
-	}
-	if m.completed != nil {
-		fields = append(fields, todo.FieldCompleted)
 	}
 	return fields
 }
@@ -303,8 +263,6 @@ func (m *TodoMutation) Field(name string) (ent.Value, bool) {
 		return m.Title()
 	case todo.FieldDescription:
 		return m.Description()
-	case todo.FieldCompleted:
-		return m.Completed()
 	}
 	return nil, false
 }
@@ -318,8 +276,6 @@ func (m *TodoMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldTitle(ctx)
 	case todo.FieldDescription:
 		return m.OldDescription(ctx)
-	case todo.FieldCompleted:
-		return m.OldCompleted(ctx)
 	}
 	return nil, fmt.Errorf("unknown Todo field %s", name)
 }
@@ -342,13 +298,6 @@ func (m *TodoMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetDescription(v)
-		return nil
-	case todo.FieldCompleted:
-		v, ok := value.(bool)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetCompleted(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Todo field %s", name)
@@ -404,9 +353,6 @@ func (m *TodoMutation) ResetField(name string) error {
 		return nil
 	case todo.FieldDescription:
 		m.ResetDescription()
-		return nil
-	case todo.FieldCompleted:
-		m.ResetCompleted()
 		return nil
 	}
 	return fmt.Errorf("unknown Todo field %s", name)

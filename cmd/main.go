@@ -7,7 +7,6 @@ import (
     "os"
 
     "github.com/go-chi/chi/v5"
-    "github.com/joho/godotenv"
     "github.com/swaggo/http-swagger"   // Swagger UI
     _ "todo-app-go/docs"               // Swagger docs
     "todo-app-go/ent"                  // Entgo Client
@@ -21,41 +20,40 @@ import (
 // @host localhost:8080
 // @BasePath /
 func main() {
-    // Load environment variables
-    err := godotenv.Load()
-    if err != nil {
-        log.Fatalf("Error loading .env file")
-    }
-
-    // Connect to Entgo client
-    client, err := ent.Open("mysql", os.Getenv("DB_USER")+":"+
-        os.Getenv("DB_PASSWORD")+"@tcp("+os.Getenv("DB_HOST")+":"+
-        os.Getenv("DB_PORT")+")/"+os.Getenv("DB_NAME")+"?parseTime=True")
+    // Entgo client bağlantısı
+    client, err := ent.Open("mysql", os.Getenv("DB_USER")+":"+os.Getenv("DB_PASSWORD")+
+        "@tcp("+os.Getenv("DB_HOST")+":"+os.Getenv("DB_PORT")+")/"+os.Getenv("DB_NAME")+"?parseTime=True")
 
     if err != nil {
         log.Fatalf("Failed to connect to database: %v", err)
     }
     defer client.Close()
 
-    // Verify connection to the database
+    // Veritabanı bağlantısını doğrula
     if err := client.Schema.Create(context.Background()); err != nil {
         log.Fatalf("Failed creating schema resources: %v", err)
     }
 
-    // Set up the router
+    // Router'ı ayarla
     r := chi.NewRouter()
 
-    // Swagger handler
+    // Swagger endpoint'i
     r.Get("/swagger/*", httpSwagger.WrapHandler)
 
-    // Todo routes using Entgo client
+    // Todo CRUD endpointleri
     r.Post("/todos", todos.CreateTodo(client))
     r.Get("/todos", todos.GetTodos(client))
     r.Get("/todos/{id}", todos.GetTodoByID(client))
     r.Put("/todos/{id}", todos.UpdateTodo(client))
     r.Delete("/todos/{id}", todos.DeleteTodo(client))
 
-    // Start server
-    log.Println("Server " + os.Getenv("APP_PORT") + " portunda çalışıyor...")
-    http.ListenAndServe(":"+os.Getenv("APP_PORT"), r)
+    // Sunucuyu başlat
+    port := os.Getenv("APP_PORT")
+    if port == "" {
+        port = "8080"  // Varsayılan olarak 8080 portu kullanılır
+    }
+    log.Println("Server " + port + " portunda çalışıyor...")
+    if err := http.ListenAndServe(":"+port, r); err != nil {
+        log.Fatalf("Server failed to start: %v", err)
+    }
 }

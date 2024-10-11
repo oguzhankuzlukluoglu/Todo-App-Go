@@ -55,20 +55,6 @@ func (tu *TodoUpdate) SetNillableDescription(s *string) *TodoUpdate {
 	return tu
 }
 
-// SetCompleted sets the "completed" field.
-func (tu *TodoUpdate) SetCompleted(b bool) *TodoUpdate {
-	tu.mutation.SetCompleted(b)
-	return tu
-}
-
-// SetNillableCompleted sets the "completed" field if the given value is not nil.
-func (tu *TodoUpdate) SetNillableCompleted(b *bool) *TodoUpdate {
-	if b != nil {
-		tu.SetCompleted(*b)
-	}
-	return tu
-}
-
 // Mutation returns the TodoMutation object of the builder.
 func (tu *TodoUpdate) Mutation() *TodoMutation {
 	return tu.mutation
@@ -134,9 +120,6 @@ func (tu *TodoUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := tu.mutation.Description(); ok {
 		_spec.SetField(todo.FieldDescription, field.TypeString, value)
 	}
-	if value, ok := tu.mutation.Completed(); ok {
-		_spec.SetField(todo.FieldCompleted, field.TypeBool, value)
-	}
 	if n, err = sqlgraph.UpdateNodes(ctx, tu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{todo.Label}
@@ -181,20 +164,6 @@ func (tuo *TodoUpdateOne) SetDescription(s string) *TodoUpdateOne {
 func (tuo *TodoUpdateOne) SetNillableDescription(s *string) *TodoUpdateOne {
 	if s != nil {
 		tuo.SetDescription(*s)
-	}
-	return tuo
-}
-
-// SetCompleted sets the "completed" field.
-func (tuo *TodoUpdateOne) SetCompleted(b bool) *TodoUpdateOne {
-	tuo.mutation.SetCompleted(b)
-	return tuo
-}
-
-// SetNillableCompleted sets the "completed" field if the given value is not nil.
-func (tuo *TodoUpdateOne) SetNillableCompleted(b *bool) *TodoUpdateOne {
-	if b != nil {
-		tuo.SetCompleted(*b)
 	}
 	return tuo
 }
@@ -293,9 +262,6 @@ func (tuo *TodoUpdateOne) sqlSave(ctx context.Context) (_node *Todo, err error) 
 	}
 	if value, ok := tuo.mutation.Description(); ok {
 		_spec.SetField(todo.FieldDescription, field.TypeString, value)
-	}
-	if value, ok := tuo.mutation.Completed(); ok {
-		_spec.SetField(todo.FieldCompleted, field.TypeBool, value)
 	}
 	_node = &Todo{config: tuo.config}
 	_spec.Assign = _node.assignValues

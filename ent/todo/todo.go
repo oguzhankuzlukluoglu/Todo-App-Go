@@ -15,8 +15,6 @@ const (
 	FieldTitle = "title"
 	// FieldDescription holds the string denoting the description field in the database.
 	FieldDescription = "description"
-	// FieldCompleted holds the string denoting the completed field in the database.
-	FieldCompleted = "completed"
 	// Table holds the table name of the todo in the database.
 	Table = "todos"
 )
@@ -26,7 +24,6 @@ var Columns = []string{
 	FieldID,
 	FieldTitle,
 	FieldDescription,
-	FieldCompleted,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -44,8 +41,6 @@ var (
 	TitleValidator func(string) error
 	// DescriptionValidator is a validator for the "description" field. It is called by the builders before save.
 	DescriptionValidator func(string) error
-	// DefaultCompleted holds the default value on creation for the "completed" field.
-	DefaultCompleted bool
 )
 
 // OrderOption defines the ordering options for the Todo queries.
@@ -64,9 +59,4 @@ func ByTitle(opts ...sql.OrderTermOption) OrderOption {
 // ByDescription orders the results by the description field.
 func ByDescription(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDescription, opts...).ToFunc()
-}
-
-// ByCompleted orders the results by the completed field.
-func ByCompleted(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldCompleted, opts...).ToFunc()
 }

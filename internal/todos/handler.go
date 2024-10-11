@@ -1,12 +1,12 @@
+
 package todos
-
 import (
-	"context"
-	"encoding/json"
-	"net/http"
-
-	"todo-app-go/ent"
-	"github.com/go-chi/chi/v5"
+    "context"
+    "encoding/json"
+    "net/http"
+    "strconv" 
+    "github.com/go-chi/chi/v5"
+    "todo-app-go/ent"
 )
 
 // @Summary Create a new Todo
@@ -20,47 +20,47 @@ import (
 // @Failure 500 {string} string "Todo eklenemedi"
 // @Router /todos [post]
 func CreateTodo(client *ent.Client) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		var todo ent.Todo
-		if err := json.NewDecoder(r.Body).Decode(&todo); err != nil {
-			http.Error(w, "Geçersiz veri", http.StatusBadRequest)
-			return
-		}
+    return func(w http.ResponseWriter, r *http.Request) {
+        var todo ent.Todo
+        if err := json.NewDecoder(r.Body).Decode(&todo); err != nil {
+            http.Error(w, "Geçersiz veri", http.StatusBadRequest)
+            return
+        }
 
-		_, err := client.Todo.
-			Create().
-			SetTitle(todo.Title).
-			SetDescription(todo.Description).
-			Save(context.Background())
-		if err != nil {
-			http.Error(w, "Todo eklenemedi", http.StatusInternalServerError)
-			return
-		}
+        _, err := client.Todo.
+            Create().
+            SetTitle(todo.Title).
+            SetDescription(todo.Description).
+            Save(context.Background())
+        if err != nil {
+            http.Error(w, "Todo eklenemedi", http.StatusInternalServerError)
+            return
+        }
 
-		w.WriteHeader(http.StatusCreated)
-		w.Write([]byte("Todo başarıyla eklendi"))
-	}
+        w.WriteHeader(http.StatusCreated)
+        w.Write([]byte("Todo başarıyla eklendi"))
+    }
 }
 
 // @Summary Get all Todos
-// @Description Bu endpoint tüm todo'ları listeler.
+// @Description Bu endpoint, tüm todo'ları listeler.
 // @Tags todos
 // @Produce  json
 // @Success 200 {array} ent.Todo "Todo'lar başarıyla listelendi"
 // @Failure 500 {string} string "Todo'lar listelenemedi"
 // @Router /todos [get]
 func GetTodos(client *ent.Client) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		todos, err := client.Todo.Query().All(context.Background())
-		if err != nil {
-			http.Error(w, "Todo'lar listelenemedi", http.StatusInternalServerError)
-			return
-		}
+    return func(w http.ResponseWriter, r *http.Request) {
+        todos, err := client.Todo.Query().All(context.Background())
+        if err != nil {
+            http.Error(w, "Todo'lar listelenemedi", http.StatusInternalServerError)
+            return
+        }
 
-		if err := json.NewEncoder(w).Encode(todos); err != nil {
-			http.Error(w, "Veriler encode edilemedi", http.StatusInternalServerError)
-		}
-	}
+        if err := json.NewEncoder(w).Encode(todos); err != nil {
+            http.Error(w, "Veriler encode edilemedi", http.StatusInternalServerError)
+        }
+    }
 }
 
 // @Summary Get a Todo by ID
@@ -69,22 +69,29 @@ func GetTodos(client *ent.Client) http.HandlerFunc {
 // @Produce  json
 // @Param id path int true "Todo ID"
 // @Success 200 {object} ent.Todo "Belirli todo başarıyla getirildi"
+// @Failure 400 {string} string "Geçersiz ID"
 // @Failure 404 {string} string "Todo bulunamadı"
 // @Failure 500 {string} string "Veritabanı hatası"
 // @Router /todos/{id} [get]
 func GetTodoByID(client *ent.Client) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		id := chi.URLParam(r, "id")
-		todo, err := client.Todo.Get(context.Background(), id)
-		if err != nil {
-			http.Error(w, "Todo bulunamadı", http.StatusNotFound)
-			return
-		}
+    return func(w http.ResponseWriter, r *http.Request) {
+        idStr := chi.URLParam(r, "id")
+        id, err := strconv.Atoi(idStr)  // string'i integer'a çeviriyoruz
+        if err != nil {
+            http.Error(w, "Geçersiz ID", http.StatusBadRequest)
+            return
+        }
 
-		if err := json.NewEncoder(w).Encode(todo); err != nil {
-			http.Error(w, "Veri encode edilemedi", http.StatusInternalServerError)
-		}
-	}
+        todo, err := client.Todo.Get(context.Background(), id)
+        if err != nil {
+            http.Error(w, "Todo bulunamadı", http.StatusNotFound)
+            return
+        }
+
+        if err := json.NewEncoder(w).Encode(todo); err != nil {
+            http.Error(w, "Veri encode edilemedi", http.StatusInternalServerError)
+        }
+    }
 }
 
 // @Summary Update a Todo
@@ -99,27 +106,32 @@ func GetTodoByID(client *ent.Client) http.HandlerFunc {
 // @Failure 500 {string} string "Todo güncellenemedi"
 // @Router /todos/{id} [put]
 func UpdateTodo(client *ent.Client) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		id := chi.URLParam(r, "id")
+    return func(w http.ResponseWriter, r *http.Request) {
+        idStr := chi.URLParam(r, "id")
+        id, err := strconv.Atoi(idStr)  // string'i integer'a çeviriyoruz
+        if err != nil {
+            http.Error(w, "Geçersiz ID", http.StatusBadRequest)
+            return
+        }
 
-		var todo ent.Todo
-		if err := json.NewDecoder(r.Body).Decode(&todo); err != nil {
-			http.Error(w, "Geçersiz veri", http.StatusBadRequest)
-			return
-		}
+        var todo ent.Todo
+        if err := json.NewDecoder(r.Body).Decode(&todo); err != nil {
+            http.Error(w, "Geçersiz veri", http.StatusBadRequest)
+            return
+        }
 
-		_, err := client.Todo.
-			UpdateOneID(id).
-			SetTitle(todo.Title).
-			SetDescription(todo.Description).
-			Save(context.Background())
-		if err != nil {
-			http.Error(w, "Todo güncellenemedi", http.StatusInternalServerError)
-			return
-		}
+        _, err = client.Todo.
+            UpdateOneID(id).
+            SetTitle(todo.Title).
+            SetDescription(todo.Description).
+            Save(context.Background())
+        if err != nil {
+            http.Error(w, "Todo güncellenemedi", http.StatusInternalServerError)
+            return
+        }
 
-		w.Write([]byte("Todo başarıyla güncellendi"))
-	}
+        w.Write([]byte("Todo başarıyla güncellendi"))
+    }
 }
 
 // @Summary Delete a Todo
@@ -128,18 +140,24 @@ func UpdateTodo(client *ent.Client) http.HandlerFunc {
 // @Produce  json
 // @Param id path int true "Todo ID"
 // @Success 200 {string} string "Todo başarıyla silindi"
+// @Failure 400 {string} string "Geçersiz ID"
 // @Failure 500 {string} string "Todo silinemedi"
 // @Router /todos/{id} [delete]
 func DeleteTodo(client *ent.Client) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		id := chi.URLParam(r, "id")
+    return func(w http.ResponseWriter, r *http.Request) {
+        idStr := chi.URLParam(r, "id")
+        id, err := strconv.Atoi(idStr)  // string'i integer'a çeviriyoruz
+        if err != nil {
+            http.Error(w, "Geçersiz ID", http.StatusBadRequest)
+            return
+        }
 
-		err := client.Todo.DeleteOneID(id).Exec(context.Background())
-		if err != nil {
-			http.Error(w, "Todo silinemedi", http.StatusInternalServerError)
-			return
-		}
+        err = client.Todo.DeleteOneID(id).Exec(context.Background())
+        if err != nil {
+            http.Error(w, "Todo silinemedi", http.StatusInternalServerError)
+            return
+        }
 
-		w.Write([]byte("Todo başarıyla silindi"))
-	}
+        w.Write([]byte("Todo başarıyla silindi"))
+    }
 }
