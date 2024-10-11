@@ -6,10 +6,11 @@ WORKDIR /app
 # Gerekli modülleri yükle
 COPY go.mod go.sum ./ 
 RUN go mod download
-
+RUN go install github.com/swaggo/swag/cmd/swag@latest
 # Kaynak kodunu ve gerekli dosyaları kopyala
 COPY . ./
 
+RUN swag init
 # Binary'yi build et
 RUN CGO_ENABLED=0 GOOS=linux go build -o todo-app ./main.go
 
@@ -30,7 +31,6 @@ COPY --from=builder /app/docs ./docs
 # Binary'nin ve gerekli dosyaların izinlerini ayarla
 RUN chmod +x /root/todo-app && \
     chmod 644 /root/model.conf /root/policy.csv
-
 # Portu expose et
 EXPOSE 8080
 

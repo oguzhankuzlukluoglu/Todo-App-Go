@@ -12,6 +12,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	_ "github.com/go-sql-driver/mysql"
 	httpSwagger "github.com/swaggo/http-swagger"
+	_ "todo-app-go/docs"
 )
 
 // Casbin middleware fonksiyonu
@@ -81,10 +82,14 @@ func main() {
 	// Casbin middleware ekle
 
 	// Swagger handler'ı ekle
-	r.Get("/swagger/*", httpSwagger.Handler(
-		httpSwagger.URL("http://localhost:8080/swagger/doc.json"), // URL'yi doğru şekilde ayarlayın
-	))
-
+	//r.Get("/swagger/doc.json", func(w http.ResponseWriter, r *http.Request) {
+	//	fmt.Println("Girdi")
+	//	http.ServeFile(w, r, "./docs/docs.go")
+	//})
+	r.Get("/swagger/*", httpSwagger.WrapHandler)
+	//r.Get("/swagger/*", httpSwagger.Handler(
+	//	httpSwagger.URL("http://localhost:8080/swagger/doc.json"), //The url pointing to API definition
+	//))
 	// Todo rotaları
 	r.Post("/users/register", todos.RegisterUser(client))
 	r.Post("/users/login", todos.LoginUser(client))
