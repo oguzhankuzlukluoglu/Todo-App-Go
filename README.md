@@ -1,6 +1,6 @@
 # Todo App
 
-![Görüntü](./Ekran görüntüsü 2024-10-12 012504.png)
+![Görüntü](./Ekran_goruntusu_2024-10-12_012504.png)
 
 A simple Todo App built with Go, Chi, and Entgo. This app includes user registration, login, and CRUD operations for todos. It also uses Casbin for role-based access control (RBAC).
 
