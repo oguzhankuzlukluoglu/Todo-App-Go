@@ -219,38 +219,9 @@
                 }
             }
         },
-        "/users": {
-            "get": {
-                "description": "Bu endpoint, tüm user'ları listeler.",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "User"
-                ],
-                "summary": "Get all User",
-                "responses": {
-                    "200": {
-                        "description": "user'lar başarıyla listelendi",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/ent.Todo"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "user'lar listelenemedi",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
         "/users/login": {
             "post": {
-                "description": "This endpoint logs in a user with their username and password.",
+                "description": "Bu endpoint, kullanıcı adı ve şifre ile giriş yapmayı sağlar.",
                 "consumes": [
                     "application/json"
                 ],
@@ -258,12 +229,12 @@
                     "application/json"
                 ],
                 "tags": [
-                    "User"
+                    "Kullanıcı"
                 ],
-                "summary": "Log in a user",
+                "summary": "Login",
                 "parameters": [
                     {
-                        "description": "User Login Data",
+                        "description": "Kullanıcı Giriş Bilgileri",
                         "name": "loginUser",
                         "in": "body",
                         "required": true,
@@ -282,76 +253,19 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Logged in successfully",
+                        "description": "Başarıyla giriş yapıldı",
                         "schema": {
                             "$ref": "#/definitions/ent.User"
                         }
                     },
                     "401": {
-                        "description": "Unauthorized",
+                        "description": "Yetkilendirme başarısız",
                         "schema": {
                             "type": "string"
                         }
                     },
                     "500": {
-                        "description": "Server error",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/users/register": {
-            "post": {
-                "description": "This endpoint registers a new user with a role.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "User"
-                ],
-                "summary": "Register a new user",
-                "parameters": [
-                    {
-                        "description": "User Registration Data",
-                        "name": "registerUser",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "object",
-                            "properties": {
-                                "password": {
-                                    "type": "string"
-                                },
-                                "role": {
-                                    "type": "string"
-                                },
-                                "username": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "User registered successfully",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid request",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "Server error",
+                        "description": "Sunucu hatası",
                         "schema": {
                             "type": "string"
                         }

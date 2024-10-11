@@ -173,32 +173,13 @@ paths:
       summary: Update a Todo
       tags:
       - todos
-  /users:
-    get:
-      description: Bu endpoint, tüm user'ları listeler.
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: user'lar başarıyla listelendi
-          schema:
-            items:
-              $ref: '#/definitions/ent.Todo'
-            type: array
-        "500":
-          description: user'lar listelenemedi
-          schema:
-            type: string
-      summary: Get all User
-      tags:
-      - User
   /users/login:
     post:
       consumes:
       - application/json
-      description: This endpoint logs in a user with their username and password.
+      description: Bu endpoint, kullanıcı adı ve şifre ile giriş yapmayı sağlar.
       parameters:
-      - description: User Login Data
+      - description: Kullanıcı Giriş Bilgileri
         in: body
         name: loginUser
         required: true
@@ -213,55 +194,18 @@ paths:
       - application/json
       responses:
         "200":
-          description: Logged in successfully
+          description: Başarıyla giriş yapıldı
           schema:
             $ref: '#/definitions/ent.User'
         "401":
-          description: Unauthorized
+          description: Yetkilendirme başarısız
           schema:
             type: string
         "500":
-          description: Server error
+          description: Sunucu hatası
           schema:
             type: string
-      summary: Log in a user
+      summary: Login
       tags:
-      - User
-  /users/register:
-    post:
-      consumes:
-      - application/json
-      description: This endpoint registers a new user with a role.
-      parameters:
-      - description: User Registration Data
-        in: body
-        name: registerUser
-        required: true
-        schema:
-          properties:
-            password:
-              type: string
-            role:
-              type: string
-            username:
-              type: string
-          type: object
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: User registered successfully
-          schema:
-            type: string
-        "400":
-          description: Invalid request
-          schema:
-            type: string
-        "500":
-          description: Server error
-          schema:
-            type: string
-      summary: Register a new user
-      tags:
-      - User
+      - Kullanıcı
 swagger: "2.0"
