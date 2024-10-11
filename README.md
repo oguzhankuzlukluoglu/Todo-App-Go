@@ -26,9 +26,9 @@ Build the Docker containers:
 docker-compose up --build
 
 ### Run the application:
-swag init 
+->swag init 
 
-docker-compose up
+->docker-compose up
 
 Swagger Documentation
 Once the app is running, you can access the Swagger documentation at:
