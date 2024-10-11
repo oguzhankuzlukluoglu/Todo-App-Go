@@ -24,7 +24,7 @@ Build the Docker containers:
 docker-compose up --build
 
 Run the application:
-swag init
+swag init and 
 
 docker-compose up
 
