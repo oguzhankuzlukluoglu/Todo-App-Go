@@ -1,6 +1,5 @@
-# role, obj, act
-admin, /todos, GET
-admin, /todos, POST
-admin, /todos, PUT
-admin, /todos, DELETE
-user, /todos, GET
+p, admin, /todos, GET
+p, admin, /todos, POST
+p, admin, /todos, PUT
+p, admin, /todos, DELETE
+p, user, /todos, GET

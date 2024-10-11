@@ -35,10 +35,14 @@ services:
       DB_NAME: todoapp
       DB_USER: todo_user
       DB_PASSWORD: user_password
+    volumes:
+      - ./casbin_model.conf:/app/casbin_model.conf
+      - ./policies.csv:/app/policies.csv
+      - ./docs:/app/docs  # Swagger dokümantasyonunun mount edilmesi
+
+      
     networks:
       - todo-app-network
-    volumes:
-      - todo-app-mysql-data:/var/lib/mysql
 
 networks:
   todo-app-network:
