@@ -44,7 +44,7 @@ func CreateTodo(client *ent.Client) http.HandlerFunc {
 	}
 }
 
-// @Summary Get all Todos
+// @Summary Get all todos
 // @Description Bu endpoint, tüm todo'ları listeler.
 // @Tags todos
 // @Produce  json
@@ -175,7 +175,6 @@ func DeleteTodo(client *ent.Client) http.HandlerFunc {
 // @Failure 400 {string} string "Geçersiz istek"
 // @Failure 500 {string} string "Sunucu hatası"
 // @Router /users/register [post]
-
 func RegisterUser(client *ent.Client) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req struct {

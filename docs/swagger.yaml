@@ -50,7 +50,7 @@ paths:
           description: Todo'lar listelenemedi
           schema:
             type: string
-      summary: Get all Todos
+      summary: Get all todos
       tags:
       - todos
     post:

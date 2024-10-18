@@ -24,7 +24,7 @@ const docTemplate = `{
                 "tags": [
                     "todos"
                 ],
-                "summary": "Get all Todos",
+                "summary": "Get all todos",
                 "responses": {
                     "200": {
                         "description": "Todo'lar başarıyla listelendi",

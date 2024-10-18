@@ -8,11 +8,12 @@ import (
 	"todo-app-go/ent/user"
 	"todo-app-go/internal/todos"
 
+	_ "todo-app-go/docs"
+
 	"github.com/casbin/casbin/v2"
 	"github.com/go-chi/chi/v5"
 	_ "github.com/go-sql-driver/mysql"
 	httpSwagger "github.com/swaggo/http-swagger"
-	_ "todo-app-go/docs"
 )
 
 func CasbinMiddleware(client *ent.Client, enforcer *casbin.Enforcer) func(http.Handler) http.Handler {
@@ -74,12 +75,13 @@ func main() {
 	}
 
 	r := chi.NewRouter()
+	CasbinMiddleware(client, &casbin.Enforcer{})
 
 	r.Get("/swagger/*", httpSwagger.WrapHandler)
 
 	r.Post("/users/register", todos.RegisterUser(client))
 	r.Post("/users/login", todos.LoginUser(client))
-	r.Get("/users", todos.GetUsers(client)) 
+	r.Get("/users", todos.GetUsers(client))
 
 	r.Post("/todos", todos.CreateTodo(client))
 	r.Get("/todos", todos.GetTodos(client))
@@ -90,4 +92,3 @@ func main() {
 	log.Println("Sunucu 8080 portunda çalışıyor...")
 	http.ListenAndServe(":8080", r)
 }
-
